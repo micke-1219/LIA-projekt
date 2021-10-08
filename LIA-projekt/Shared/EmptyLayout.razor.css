@@ -1,0 +1,11 @@
+﻿.banner {
+    background-color: #005a87;
+    height: 5rem;
+}
+
+.title {
+    font-size: 24px;
+    color: white;
+    margin: 0;
+    margin-left: 2rem;
+}

@@ -1,0 +1,99 @@
+﻿@page "/errorreport"
+
+<Auth />
+
+<h4 class="mb-3">Gör en ny felanmälan</h4>
+
+<EditForm Model="@errorReport" OnSubmit="@SubmitErrorReportAsync">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+        <InputSelect class="form-select shadow-none" aria-label="Default select example" required @bind-Value="errorReport.Category">
+            <option disabled selected>Välj kategori</option>
+            <option value="Bostad">Bostad</option>
+            <option value="Trapphus">Trapphus</option>
+            <option value="Övrigt">Övrigt</option>
+        </InputSelect>
+        <div class="validation">
+            <ValidationMessage For="() => errorReport.Category" />
+        </div>
+        <label for="errorReportDescription" class="form-label mt-5">Beskrivning av felet</label>
+        <InputTextArea class="form-control shadow-none" id="errorReportDescription" rows="3" minlength="5" maxlength="300" required @bind-Value="errorReport.Description" />
+        <div class="validation">
+            <ValidationMessage For="() => errorReport.Description" />
+        </div>
+    </div>
+    <button type="submit" class="primary-btn mt-5" disabled="@(!context.IsModified() || !context.Validate())">Skicka in felanmälan</button>
+</EditForm>
+
+<h4 class="mt-5 mb-3">Aktuella felanmälningar</h4>
+
+@if (errorReports.Count == 0)
+{
+    <p>Inga aktuella felanmälningar</p>
+}
+else
+{
+    @foreach (var error in errorReports)
+    {
+        <div class="accordion mb-3">
+            <div class="accordion-item">
+                <div class="accordion-header" id="heading-@error.Id">
+                    <div class="error-report accordion-button collapsed shadow-none d-flex" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@error.Id" aria-expanded="false" aria-controls="collapse-@error.Id">
+                        <div class="me-5">
+                            <p class="gray-text mb-1">Datum</p>
+                            <p class="gray-text bold-text mt-1">@error.Date.ToString("yyyy/MM/dd")</p>
+                        </div>
+                        <div class="ms-5 me-5">
+                            <p class="gray-text mb-1">Kategori</p>
+                            <p class="gray-text bold-text mt-1">@error.Category</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="collapse-@error.Id" class="accordion-collapse collapse" aria-labelledby="heading-@error.Id">
+                    <div class="accordion-body">
+                        <div class="white-background">
+                            <p><span class="bold-text">Id:</span> @error.Id</p>
+                            <p><span class="bold-text">Datum:</span> @error.Date.ToString("yyyy/MM/dd")</p>
+                            <p><span class="bold-text">Kategori:</span> @error.Category</p>
+                            <p><span class="bold-text">Beskrivning:</span> @error.Description</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private ErrorReportModel errorReport;
+    private List<ErrorReportModel> errorReports = new List<ErrorReportModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        errorReport = new ErrorReportModel();
+        await GetErrorReportsAsync();
+    }
+
+    private async Task SubmitErrorReportAsync()
+    {
+        errorReport.Date = DateTime.Now;
+        errorReport.UserId = await GetUserIdAsync();
+        await http.PostAsJsonAsync<ErrorReportModel>("https://localhost:44363/api/ErrorReports", errorReport);
+        await GetErrorReportsAsync();
+        errorReport = new ErrorReportModel();
+    }
+
+    private async Task GetErrorReportsAsync()
+    {
+        var userId = await sessionStorage.GetItemAsync<string>("UserId");
+        errorReports = await http.GetFromJsonAsync<List<ErrorReportModel>>($"https://localhost:44363/api/ErrorReports/User/{userId}");
+        errorReports.Reverse();
+    }
+
+    private async Task<int> GetUserIdAsync()
+    {
+        var userId = await sessionStorage.GetItemAsync<string>("UserId");
+        var _userId = Int32.Parse(userId);
+        return _userId;
+    }
+}

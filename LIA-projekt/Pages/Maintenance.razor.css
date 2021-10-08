@@ -1,0 +1,45 @@
+﻿.maintenance {
+    background-color: #fafafa;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.white-background {
+    background-color: white;
+    border-radius: 10px;
+    padding: 1rem;
+    border: 1px solid lightgray;
+    line-height: 1.5;
+}
+
+.validation {
+    margin-top: 5px;
+    display: inline-block;
+    position: absolute;
+}
+
+.accordion-item {
+    border: none;
+    border-bottom-right-radius: 10px !important;
+    border-bottom-left-radius: 10px !important;
+}
+
+.accordion-button {
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px !important;
+}
+
+    .accordion-button.collapsed {
+        border-top-left-radius: 10px !important;
+        border-top-right-radius: 10px !important;
+        border-bottom-right-radius: 10px !important;
+        border-bottom-left-radius: 10px !important;
+    }
+
+.accordion-body {
+    background-color: #fafafa;
+    border-bottom-right-radius: 10px !important;
+    border-bottom-left-radius: 10px !important;
+}

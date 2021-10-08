@@ -1,0 +1,25 @@
+﻿.banner {
+    background-color: #005a87;
+    height: 5rem;
+}
+
+.user {
+    margin-right: 2rem;
+}
+
+    .user ion-icon {
+        color: white;
+        font-size: 30px;
+    }
+
+    .user a {
+        font-size: 18px;
+        text-decoration: none;
+        color: white;
+    }
+
+
+.username {
+    color: white;
+    font-size: 18px;
+}

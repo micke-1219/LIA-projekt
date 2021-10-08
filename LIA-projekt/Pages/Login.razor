@@ -1,0 +1,108 @@
+﻿@page "/login"
+@layout EmptyLayout
+
+<div class="login">
+    <h2 class="blue-text mb-3">Logga in</h2>
+
+    <p class="mb-3">
+        Loggar du in på Mina sidor får du tillgång till information och ett flertal tjänster som är till<br>
+        nytta för dig som hyresgäst.
+    </p>
+
+    <a class="register" href="/register">&#10095; Registrera dig här</a>
+
+    <div class="accordion mt-3" id="accordionExample">
+        <!--Login with email-->
+        <EditForm Model="@loginModel" OnSubmit="LoginUserAsync">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        E-postadress & lösenord
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <p class="gray-text mb-3">Logga in med e-postadress och lösenord.</p>
+                        <div class="d-flex">
+                            <InputText type="email" class="form-control me-2 shadow-none" id="loginEmail" placeholder="E-postadress" @bind-Value="@loginModel.Email" />
+                            <InputText type="password" class="form-control ms-2 shadow-none" id="loginPassword" placeholder="Lösenord" @bind-Value="@loginModel.Password" />
+                        </div>
+                        @if (status == "BadRequest")
+                        {
+                            <div class="error-message">Fel E-postadress eller lösenord.</div>
+                        }
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="primary-btn mt-3">Logga in</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+        <!--Login with BankID-->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Mobilt BankID
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    <p class="gray-text mb-3">Logga in med Mobilt BankID.</p>
+                    <input class="form-control shadow-none" id="personId" placeholder="Personnummer">
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="primary-btn mt-3">Logga in</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Forgot password-->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    Glömt lösenord
+                </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    <p class="gray-text mb-3">Begär ett nytt lösenord via e-post till den adress som du tidigare angett.</p>
+                    <input type="email" class="form-control shadow-none me-2" id="forgotPassword" placeholder="E-postadress">
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="primary-btn mt-3">Skicka lösenord</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel;
+    public string status;
+
+    protected override void OnInitialized()
+    {
+        loginModel = new LoginModel();
+    }
+
+    private async Task LoginUserAsync()
+    {
+        var response = await http.PostAsJsonAsync("https://localhost:44363/api/Users/login", loginModel);
+        status = response.StatusCode.ToString();
+
+        if (status == "OK")
+        {
+            var data = JsonConvert.DeserializeObject<dynamic>(await response.Content.ReadAsStringAsync());
+
+            await sessionStorage.SetItemAsync<string>("AccessToken", data.accessToken.ToString());
+            await sessionStorage.SetItemAsync<string>("UserId", data.id.ToString());
+
+            Console.WriteLine("Successfully logged in user!");
+
+            navigationManager.NavigateTo("/");
+        }
+        else
+            {
+                Console.WriteLine("Failed to log in user.");
+            }
+    }
+}

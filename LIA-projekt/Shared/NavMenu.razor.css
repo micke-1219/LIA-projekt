@@ -1,0 +1,38 @@
+.navmenu-top {
+    height: 5rem;
+    background-color: #005a87;
+}
+
+.title {
+    font-size: 24px;
+    color: white;
+    margin: 0;
+    margin-left: 2rem;
+}
+
+.navmenu {
+    padding: 0;
+}
+
+.nav-item {
+    font-size: 18px;
+    background-color: #fafafa;
+}
+
+    .nav-item ::deep a {
+        color: black;
+        padding-left: 2rem;
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+        width: 15rem;
+    }
+
+        .nav-item ::deep a.active {
+            background-color: #007cba;
+            color: white;
+        }
+
+        .nav-item ::deep a:hover {
+            background-color: #007cba;
+            color: white;
+        }

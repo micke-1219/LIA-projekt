@@ -1,0 +1,21 @@
+﻿.gray-border {
+    border-bottom: solid 5px lightgray;
+}
+
+.message {
+    border-bottom: solid 1px lightgray;
+}
+
+.modal-btn {
+    width: 10rem;
+}
+
+.validation {
+    margin-top: 5px;
+    display: inline-block;
+    position: absolute;
+}
+
+.margin {
+    height: 2rem;
+}

@@ -1,0 +1,80 @@
+CREATE TABLE Users ( 
+	[Id] int not null identity(1,1) primary key,
+	[FirstName] nvarchar(50) not null,
+	[LastName] nvarchar(50) not null,
+	[PersonalIdentityNumber] varchar(10) not null,
+	[Email] varchar(100) not null,
+	[PhoneNumber] varchar(15) not null,
+	[PasswordHash] varbinary(max) not null,
+	[PasswordSalt] varbinary(max) not null 
+)
+
+GO
+
+CREATE TABLE ApartmentContracts (
+	[Id] int not null identity(1,1) primary key,
+	[Object] nvarchar(50) not null,
+	[Address] nvarchar(100) not null,
+	[ZipCode] char(5) not null,
+	[City] nvarchar(50) not null,
+	[ApartmentNumber] char(4) not null,
+	[Rent] decimal not null,
+	[StartDate] datetime not null,
+	[IsCanceled] bit not null default 0,
+	[UserId] int not null references Users(Id)
+)
+
+CREATE TABLE Bills (
+	[Id] int not null identity(1,1) primary key,
+	[Object] nvarchar(50) not null,
+	[Adress] nvarchar(100),
+	[Amount] decimal not null,
+	[Month] char(2) not null,
+	[Year] char(4) not null,
+	[ExpiryDate] datetime not null,
+	[IsPaid] bit not null default 0,
+	[UserId] int not null references Users(Id)
+)
+
+CREATE TABLE BulletinMessages (
+	[Id] int not null identity(1,1) primary key,
+	[Title] nvarchar(50) not null,
+	[Message] nvarchar(300) not null,
+	[Date] datetime not null,
+	[UserId] int not null references Users(Id)
+)
+
+CREATE TABLE ErrorReports (
+	[Id] int not null identity(1,1) primary key,
+	[Category] nvarchar(50) not null,
+	[Description] nvarchar(300) not null,
+	[Date] datetime not null,
+	[UserId] int not null references Users(Id)
+)
+
+CREATE TABLE LaundryBookings (
+	[Id] int not null identity(1,1) primary key,
+	[Date] datetime null,
+	[IsBooked] bit not null default 0,
+	[UserId] int not null references Users(Id)
+)
+
+CREATE TABLE Maintenances (
+	[Id] int not null identity(1,1) primary key,
+	[Category] nvarchar(50) not null,
+	[Date] datetime not null,
+	[UserId] int not null references Users(Id)
+)
+
+CREATE TABLE ParkingContracts (
+	[Id] int not null identity(1,1) primary key,
+	[Object] nvarchar(50) not null,
+	[Address] nvarchar(100) not null,
+	[ZipCode] char(5) not null,
+	[City] nvarchar(50) not null,
+	[LotNumber] char(4) not null,
+	[Rent] decimal not null,
+	[StartDate] datetime not null,
+	[IsCanceled] bit not null default 0,
+	[UserId] int not null references Users(Id)
+)

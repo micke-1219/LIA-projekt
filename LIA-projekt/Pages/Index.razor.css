@@ -1,0 +1,21 @@
+﻿.user-info {
+    background-color: #fafafa;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-radius: 10px;
+}
+
+.user-info p {
+    line-height: 1.5;
+    font-size: 18px;
+}
+
+.gray-border {
+    border-bottom: solid 5px lightgray;
+}
+
+.message {
+    border-bottom: solid 1px lightgray;
+}

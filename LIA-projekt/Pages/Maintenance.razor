@@ -1,0 +1,168 @@
+﻿@page "/maintenance"
+
+<Auth />
+
+<h4 class="mb-3">Beställ lägenhetsunderhåll</h4>
+
+<div class="accordion mb-3">
+    <div class="accordion-item">
+        <div class="accordion-header" id="heading">
+            <div class="maintenance accordion-button collapsed shadow-none d-flex" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-info" aria-expanded="false" aria-controls="collapse-info">
+                <div>
+                    <p class="gray-text">Information om lägenhetsunderhåll</p>
+                </div>
+            </div>
+        </div>
+        <div id="collapse-info" class="accordion-collapse collapse" aria-labelledby="heading-info">
+            <div class="accordion-body">
+                <div class="white-background">
+                    <p>
+                        Här kan du som hyresgäst beställa lägenhetsunderhåll. Vi tillämpar hyresgäststyrt lägenhetsunderhåll.
+                        Det innebär att du själv bestämmer om, när och hur du vill förnya hemma.
+                        Väljer du att renovera tidigare än vi planerat betalar du en engångskostnad.
+                        Väntar du med renoveringen får du istället en rabatt på hyran.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<EditForm Model="@apartmentMaintenance" OnSubmit="@SubmitMaintenanceAsync">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+        <InputSelect class="form-select shadow-none" aria-label="Default select example" required @bind-Value="apartmentMaintenance.Category">
+            <option disabled selected>Välj kategori</option>
+            <option value="Golv: Badrum">Golv: Badrum</option>
+            <option value="Golv: Hall">Golv: Hall</option>
+            <option value="Golv: Kök">Golv: Kök</option>
+            <option value="Golv: Sovrum">Golv: Sovrum</option>
+            <option value="Golv: Vardagsrum">Golv: Vardagsrum</option>
+            <option value="Väggar: Badrum">Väggar: Badrum</option>
+            <option value="Väggar: Hall">Väggar: Hall</option>
+            <option value="Väggar: Kök">Väggar: Kök</option>
+            <option value="Väggar: Sovrum">Väggar: Sovrum</option>
+            <option value="Väggar: Vardagsrum">Väggar: Vardagsrum</option>
+            <option value="Övrigt: Badkar">Övrigt: Badkar</option>
+            <option value="Övrigt: Diskmaskin">Övrigt: Diskmaskin</option>
+            <option value="Övrigt: Frys">Övrigt: Frys</option>
+            <option value="Övrigt: Handfat">Övrigt: Handfat</option>
+            <option value="Övrigt: Kylskåp">Övrigt: Kylskåp</option>
+            <option value="Övrigt: Köksluckor">Övrigt: Köksluckor</option>
+            <option value="Övrigt: Spis">Övrigt: Spis</option>
+            <option value="Övrigt: Toalettstol">Övrigt: Toalettstol</option>
+            <option value="Övrigt: Tvättmaskin">Övrigt: Tvättmaskin</option>
+        </InputSelect>
+        <div class="validation">
+            <ValidationMessage For="() => apartmentMaintenance.Category" />
+        </div>
+    </div>
+    <button type="button" class="primary-btn mt-5" disabled="@(!context.IsModified() || !context.Validate())" data-bs-toggle="modal" data-bs-target="#maintenanceModal">Beställ lägenhetsunderhåll</button>
+
+    <!-- Maintenance Modal -->
+    <div class="modal fade" id="maintenanceModal" tabindex="-1" aria-labelledby="maintenanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title blue-text">Beställ lägenhetsunderhåll</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Är du säker på din beställning av lägenhetsunderhåll?</p>
+                </div>
+                <div class="modal-footer d-flex">
+                    <button type="button" class="primary-btn" data-bs-toggle="modal" data-bs-target="#confirmationModal" data-bs-dismiss="modal" @onclick="() => SubmitMaintenanceAsync()">Ja</button>
+                    <button type="button" class="primary-btn" data-bs-dismiss="modal">Nej</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+<h4 class="mt-5 mb-3">Beställt lägenhetsunderhåll</h4>
+
+@if (apartmentMaintenances.Count == 0)
+{
+    <p>Inget beställt lägenhetsunderhåll</p>
+}
+else
+{
+    @foreach (var maintenance in apartmentMaintenances)
+    {
+        <div class="accordion mb-3">
+            <div class="accordion-item">
+                <div class="accordion-header" id="heading-@maintenance.Id">
+                    <div class="maintenance accordion-button collapsed shadow-none d-flex" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@maintenance.Id" aria-expanded="false" aria-controls="collapse-@maintenance.Id">
+                        <div class="me-5">
+                            <p class="gray-text mb-1">Datum</p>
+                            <p class="gray-text bold-text mt-1">@maintenance.Date.ToString("yyyy/MM/dd")</p>
+                        </div>
+                        <div class="ms-5 me-5">
+                            <p class="gray-text mb-1">Kategori</p>
+                            <p class="gray-text bold-text mt-1">@maintenance.Category</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="collapse-@maintenance.Id" class="accordion-collapse collapse" aria-labelledby="heading-@maintenance.Id">
+                    <div class="accordion-body">
+                        <div class="white-background">
+                            <p><span class="bold-text mb-2">Id:</span> @maintenance.Id</p>
+                            <p><span class="bold-text mb-2">Datum:</span> @maintenance.Date.ToString("yyyy/MM/dd")</p>
+                            <p><span class="bold-text mb-2">Kategori:</span> @maintenance.Category</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title blue-text">Lägenhetsunderhåll beställt</h5>
+            </div>
+            <div class="modal-body">
+                <p>Din beställning är registrerad. Hyresvärden kommer att kontakta dig. Skulle du inte ha rätt till underhållet du har beställt blir du informerad om detta via e-post.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="primary-btn" data-bs-dismiss="modal">Stäng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private MaintenanceModel apartmentMaintenance;
+    private List<MaintenanceModel> apartmentMaintenances = new List<MaintenanceModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        apartmentMaintenance = new MaintenanceModel();
+        await GetMaintenancesAsync();
+    }
+
+    private async Task SubmitMaintenanceAsync()
+    {
+        apartmentMaintenance.Date = DateTime.Now;
+        apartmentMaintenance.UserId = await GetUserIdAsync();
+        await http.PostAsJsonAsync<MaintenanceModel>("https://localhost:44363/api/Maintenances", apartmentMaintenance);
+        await GetMaintenancesAsync();
+        apartmentMaintenance = new MaintenanceModel();
+    }
+
+    private async Task GetMaintenancesAsync()
+    {
+        var userId = await sessionStorage.GetItemAsync<string>("UserId");
+        apartmentMaintenances = await http.GetFromJsonAsync<List<MaintenanceModel>>($"https://localhost:44363/api/Maintenances/User/{userId}");
+        apartmentMaintenances.Reverse();
+    }
+
+    private async Task<int> GetUserIdAsync()
+    {
+        var userId = await sessionStorage.GetItemAsync<string>("UserId");
+        var _userId = Int32.Parse(userId);
+        return _userId;
+    }
+}

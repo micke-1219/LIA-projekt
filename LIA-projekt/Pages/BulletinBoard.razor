@@ -1,0 +1,86 @@
+﻿@page "/bulletinboard"
+
+<Auth />
+
+<button type="button" class="primary-btn" data-bs-toggle="modal" data-bs-target="#messageModal">Nytt inlägg</button>
+<div class="gray-border mt-4"></div>
+
+@if (bulletinMessages.Count == 0)
+{
+    <p class="mt-3">Det finns inga meddelanden på anslagstavlan</p>
+}
+else
+{
+    @foreach (var message in bulletinMessages)
+    {
+        <div class="message pt-2 pb-2">
+            <div class="d-flex pt-2 pb-2">
+                <p class="blue-text bold-text me-2">@message.Date</p>
+                <p class="bold-text">@message.Title</p>
+            </div>
+            <p class="gray-text pb-2">@message.Message</p>
+        </div>
+    }
+}
+
+<!-- Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <EditForm Model="@bulletinMessage">
+                <DataAnnotationsValidator />
+                <div class="modal-header">
+                    <h5 class="modal-title blue-text">Gör ett nytt inlägg</h5>
+                </div>
+                <div class="modal-body mt-3">
+                    <InputText class="form-control shadow-none" type="text" placeholder="Titel" @bind-Value="bulletinMessage.Title" />
+                    <div class="validation">
+                        <ValidationMessage For="() => bulletinMessage.Title" />
+                    </div>
+                    <div class="margin"></div>
+                    <InputTextArea class="form-control shadow-none" rows="3" placeholder="Meddelande" @bind-Value="bulletinMessage.Message" />
+                    <div class="validation">
+                        <ValidationMessage For="() => bulletinMessage.Message" />
+                    </div>
+                </div>
+                <div class="modal-footer mt-3">
+                    <button type="button" class="primary-btn modal-btn" data-bs-dismiss="modal">Avbryt</button>
+                    <button type="button" class="primary-btn modal-btn" data-bs-dismiss="modal" disabled="@(!context.IsModified() || !context.Validate())" @onclick="() => SubmitMessageAsync()">Publicera</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private BulletinMessageModel bulletinMessage;
+    private List<BulletinMessageModel> bulletinMessages = new List<BulletinMessageModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        bulletinMessage = new BulletinMessageModel();
+        await GetMessagesAsync();
+    }
+
+    private async Task SubmitMessageAsync()
+    {
+        bulletinMessage.Date = DateTime.Now;
+        bulletinMessage.UserId = await GetUserIdAsync();
+        await http.PostAsJsonAsync<BulletinMessageModel>("https://localhost:44363/api/BulletinMessages", bulletinMessage);
+        await GetMessagesAsync();
+        bulletinMessage = new BulletinMessageModel();
+    }
+
+    private async Task GetMessagesAsync()
+    {
+        bulletinMessages = await http.GetFromJsonAsync<List<BulletinMessageModel>>("https://localhost:44363/api/BulletinMessages");
+        bulletinMessages.Reverse();
+    }
+
+    private async Task<int> GetUserIdAsync()
+    {
+        var userId = await sessionStorage.GetItemAsync<string>("UserId");
+        var _userId = Int32.Parse(userId);
+        return _userId;
+    }
+}

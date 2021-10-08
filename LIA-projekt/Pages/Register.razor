@@ -1,0 +1,127 @@
+﻿@page "/register"
+@layout EmptyLayout
+
+<div class="d-flex justify-content-center">
+    <div class="register">
+        <h2 class="blue-text mb-3">Registrera användare</h2>
+
+        <p class="mb-3">
+            Registrera en användare för att kunna logga in på Mina sidor.
+        </p>
+
+        <a class="login" href="/login">&#10095; Tillbaka till inloggning</a>
+
+        <EditForm Model="@registerModel" OnSubmit="RegisterUserAsync">
+            <DataAnnotationsValidator />
+            <div class="d-flex mt-3 mb-5">
+                <div class="form-container me-2">
+                    <InputText class="form-control shadow-none" id="firstName" placeholder="Förnamn" required @bind-Value="@registerModel.FirstName" />
+                    <div class="validation-large">
+                        <ValidationMessage For="() => registerModel.FirstName" />
+                    </div>
+                </div>
+                <div class="form-container ms-2">
+                    <InputText class="form-control shadow-none" id="lastName" placeholder="Efternamn" required @bind-Value="@registerModel.LastName" />
+                    <div class="validation-large">
+                        <ValidationMessage For="() => registerModel.LastName" />
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex mb-5">
+                <div class="form-container me-2">
+                    <InputText class="form-control shadow-none" id="personalId" placeholder="Personnummer" required @bind-Value="@registerModel.PersonalIdentityNumber" />
+                    <div class="validation-large">
+                        <ValidationMessage For="() => registerModel.PersonalIdentityNumber" />
+                    </div>
+                </div>
+                <div class="form-container ms-2">
+                    <InputText class="form-control shadow-none" id="phoneNr" placeholder="Telefonnummer" required @bind-Value="@registerModel.PhoneNumber" />
+                    <div class="validation-large">
+                        <ValidationMessage For="() => registerModel.PhoneNumber" />
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex mb-5">
+                <div class="form-container me-2">
+                    <InputText type="email" class="form-control shadow-none" id="email" placeholder="E-postadress" required @bind-Value="@registerModel.Email" />
+                    <div class="validation-large">
+                        <ValidationMessage For="() => registerModel.Email" />
+                    </div>
+                </div>
+                <div class="form-container ms-2 d-flex">
+                    <div class="me-2">
+                        <InputText type="password" class="form-control shadow-none" id="password" placeholder="Lösenord" required @bind-Value="@registerModel.Password" />
+                        <div class="validation-small">
+                            <ValidationMessage For="() => registerModel.Password" />
+                        </div>
+                    </div>
+                    <div class="ms-2">
+                        <InputText type="password" class="form-control shadow-none" id="passwordConfirm" placeholder="Bekräfta lösenord" required @bind-Value="@registerModel.PasswordConfirm" />
+                        <div class="validation-small">
+                            <ValidationMessage For="() => registerModel.PasswordConfirm" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="primary-btn" type="submit" data-bs-toggle="modal" data-bs-target="#registerModal" disabled="@(!context.IsModified() || !context.Validate())">Registrera</button>
+        </EditForm>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title blue-text">Registrera användare</h5>
+            </div>
+            <div class="modal-body">
+                @if (succeed == true)
+                {
+                    <p>Registreringen lyckades!</p>
+                }
+                else
+                {
+                    <p>E-postadressen finns redan i databasen!</p>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="primary-btn" data-bs-dismiss="modal">Stäng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private RegisterModel registerModel;
+    private IEnumerable<UserModel> users;
+    private bool succeed = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        registerModel = new RegisterModel();
+        await GetUsersAsync();
+    }
+
+    private async Task GetUsersAsync()
+    {
+        users = await http.GetFromJsonAsync<IEnumerable<UserModel>>($"https://localhost:44363/api/Users");
+    }
+
+    private async Task RegisterUserAsync()
+    {
+        if (!users.Any(x => x.Email == registerModel.Email))
+        {
+            await http.PostAsJsonAsync("https://localhost:44363/api/Users/register", registerModel);
+            succeed = true;
+            registerModel = new RegisterModel();
+            Console.WriteLine("Successfully registered user!");
+        }
+
+        else
+        {
+            registerModel = new RegisterModel();
+            Console.WriteLine("Failed to register user.");
+        }
+    }
+}

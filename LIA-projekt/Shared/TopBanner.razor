@@ -1,0 +1,28 @@
+﻿<nav class="banner d-flex align-items-center justify-content-end">
+    <div class="user d-flex align-items-center">
+        <div class="d-flex align-items-center">
+            <ion-icon name="person-circle-outline"></ion-icon>
+            <p class="username ms-1 me-3">@userModel.FirstName @userModel.LastName</p>
+            <a class="pt-1" href="/logout"><ion-icon name="log-out-outline"></ion-icon></a>
+        </div>
+    </div>
+</nav>
+
+@code {
+    private UserModel userModel = new UserModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUserAsync();
+    }
+
+    private async Task GetUserAsync()
+    {
+        var userId = await sessionStorage.GetItemAsync<string>("UserId");
+        if (userId != null)
+        {
+            var _userId = Int32.Parse(userId);
+            userModel = await http.GetFromJsonAsync<UserModel>($"https://localhost:44363/api/Users/{_userId}");
+        }
+    }
+}

@@ -1,0 +1,63 @@
+﻿@page "/"
+
+<Auth />
+
+<div>
+    <h4 class="mb-3">Användaruppgifter</h4>
+    <div class="user-info mb-5">
+        <p class="gray-text"><span class="bold-text gray-text">Förnamn:</span> @userModel.FirstName</p>
+        <p class="gray-text"><span class="bold-text gray-text">Efternamn:</span> @userModel.LastName</p>
+        <p class="gray-text"><span class="bold-text gray-text">Användar-ID:</span> @userModel.Id</p>
+        <p class="gray-text"><span class="bold-text gray-text">E-postadress:</span> @userModel.Email</p>
+        <p class="gray-text"><span class="bold-text gray-text">Personnummer:</span> @userModel.PersonalIdentityNumber</p>
+        <p class="gray-text"><span class="bold-text gray-text">Telefonnummer:</span> @userModel.PhoneNumber</p>
+    </div>
+    <div>
+        <h4 class="mb-3">Senaste från anslagstavlan</h4>
+        <div class="gray-border"></div>
+        @if (bulletinMessages.Count == 0)
+        {
+            <p class="mt-3">Det finns inga meddelanden på anslagstavlan</p>
+        }
+        else
+        {
+            @foreach (var message in bulletinMessages.GetRange(0, 3))
+            {
+                <div class="message pt-2 pb-2">
+                    <div class="d-flex pt-2 pb-2">
+                        <p class="blue-text bold-text me-2">@message.Date</p>
+                        <p class="bold-text">@message.Title</p>
+                    </div>
+                    <p class="gray-text pb-2">@message.Message</p>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private UserModel userModel = new UserModel();
+    private List<BulletinMessageModel> bulletinMessages = new List<BulletinMessageModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUserAsync();
+        await GetMessagesAsync();
+    }
+
+    private async Task GetUserAsync()
+    {
+        var userId = await sessionStorage.GetItemAsync<string>("UserId");
+        if (userId != null)
+        {
+            var _userId = Int32.Parse(userId);
+            userModel = await http.GetFromJsonAsync<UserModel>($"https://localhost:44363/api/Users/{_userId}");
+        }
+    }
+
+    private async Task GetMessagesAsync()
+    {
+        bulletinMessages = await http.GetFromJsonAsync<List<BulletinMessageModel>>("https://localhost:44363/api/BulletinMessages");
+        bulletinMessages.Reverse();
+    }
+}

@@ -1,0 +1,101 @@
+﻿.my-bookings {
+    background-color: #fafafa;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-radius: 10px;
+}
+
+    .my-bookings p {
+        line-height: 1.5;
+        font-size: 18px;
+    }
+
+    .my-bookings a {
+        line-height: 1.5;
+        font-size: 18px;
+        text-decoration: none;
+        color: #007cba;
+        cursor: pointer;
+    }
+
+        .my-bookings a:hover {
+            color: #005a87;
+        }
+
+.arrow {
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.month {
+    background-color: lightgray;
+    padding: 1rem;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.weekday {
+    color: gray;
+    background-color: #fafafa;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-left: solid 1px lightgray;
+    border-right: solid 1px lightgray;
+    border-bottom: solid 1px lightgray;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar {
+    border-left: solid 1px lightgray;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.day {
+    height: 10rem;
+    border-right: solid 1px lightgray;
+    border-bottom: solid 1px lightgray;
+}
+
+.current-date {
+    background-color: #007cba;
+    color: white;
+    margin-top: 3px;
+    height: 24px;
+    width: 24px;
+    line-height: 24px;
+    border-radius: 50px;
+}
+
+.booking {
+    background-color: #fafafa;
+    cursor: pointer;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bookingTaken {
+    background-color: lightgray;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.booking:hover {
+    background-color: lightgray;
+}
+
+.margin {
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+}

@@ -1,0 +1,414 @@
+﻿@page "/laundrybooking"
+
+<Auth />
+
+
+<h4 class="mb-3">Aktuella bokningar</h4>
+<div class="my-bookings mb-3">
+    @if (userLaundryBookings.Count == 0)
+    {
+        <p class="gray-text">Inga aktuella bokningar</p>
+    }
+    else
+    {
+        @foreach (var booking in userLaundryBookings)
+        {
+            @if (booking.Date >= DateTime.Now.AddHours(-4))
+            {
+                string bookingStart = booking.Date.ToString();
+                string bookingEnd = booking.Date.Value.AddHours(4).TimeOfDay.ToString();
+                bookingStart = bookingStart.Remove(16, 3);
+                bookingEnd = bookingEnd.Remove(5, 3);
+                <div class="d-flex">
+                    <p class="gray-text">@bookingStart - @bookingEnd -</p>
+                    <a class="ms-1" data-bs-toggle="modal" data-bs-target="#cancelBookingModal-@booking.Id">Avboka</a>
+                </div>
+                filteredBookings.Add(booking);
+            }
+
+            <!-- Cancel Booking Modal -->
+            <div class="modal fade" id="cancelBookingModal-@booking.Id" tabindex="-1" aria-labelledby="cancelBookingModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title blue-text">Avboka tvättid</h5>
+                        </div>
+                        <div class="modal-body">
+                            <p>Är du säker på att du vill avboka tvättiden?</p>
+                        </div>
+                        <div class="modal-footer d-flex">
+                            <button type="button" class="primary-btn" data-bs-toggle="modal" data-bs-target="#confirmationModal" data-bs-dismiss="modal" @onclick="() => CancelBookingAsync(booking.Id)">Ja</button>
+                            <button type="button" class="primary-btn" data-bs-dismiss="modal">Nej</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        @if (filteredBookings.Count == 0)
+        {
+            <p class="gray-text">Inga aktuella bokningar</p>
+        }
+    }
+</div>
+
+<div class="month d-flex justify-content-between align-items-center mt-2">
+    <div class="arrow" @onclick="() => { monthCount--; CreateMonth(); }">&#10094;</div>
+    <h5>@monthName @year</h5>
+    <div class="arrow" @onclick="() => { monthCount++; CreateMonth(); }">&#10095;</div>
+</div>
+<div class="mb-3">
+    <div class="weekday">
+        <div class="text-center">Mån</div>
+        <div class="text-center">Tis</div>
+        <div class="text-center">Ons</div>
+        <div class="text-center">Tor</div>
+        <div class="text-center">Fre</div>
+        <div class="text-center">Lör</div>
+        <div class="text-center">Sön</div>
+    </div>
+    <div class="calendar">
+        @for (int column = 0; column < emptyColumns; column++)
+        {
+            <div class="day gray-text text-center">
+                <div class="margin">@(lastMonthDate++)</div>
+            </div>
+        }
+        @for (int date = 1; date <= monthEnd.Day; date++)
+        {
+            @if (date == DateTime.Now.Day && monthCount == 0)
+            {
+                <div class="day text-center">
+                    <div class="margin">
+                        <div class="current-date">@date</div>
+                    </div>
+                    @if (BookingAvailable(timeOne, date))
+                    {
+                        <div data-bs-toggle="modal" data-bs-target="#bookingModal-@date-1" class="booking">08.00-12.00</div>
+                    }
+                    else
+                    {
+                        <div class="bookingTaken">08.00-12.00</div>
+                    }
+                    @if (BookingAvailable(timeTwo, date))
+                    {
+                        <div data-bs-toggle="modal" data-bs-target="#bookingModal-@date-2" class="booking">12.00-16.00</div>
+                    }
+                    else
+                    {
+                        <div class="bookingTaken">12.00-16.00</div>
+                    }
+                    @if (BookingAvailable(timeThree, date))
+                    {
+                        <div data-bs-toggle="modal" data-bs-target="#bookingModal-@date-3" class="booking">16.00-20.00</div>
+                    }
+                    else
+                    {
+                        <div class="bookingTaken">16.00-20.00</div>
+                    }
+                    <div class="margin"></div>
+                </div>
+            }
+            else
+            {
+                <div class="day text-center">
+                    <div class="margin">@date</div>
+                    @if (BookingAvailable(timeOne, date))
+                    {
+                        <div data-bs-toggle="modal" data-bs-target="#bookingModal-@date-1" class="booking">08.00-12.00</div>
+                    }
+                    else
+                    {
+                        <div class="bookingTaken">08.00-12.00</div>
+                    }
+                    @if (BookingAvailable(timeTwo, date))
+                    {
+                        <div data-bs-toggle="modal" data-bs-target="#bookingModal-@date-2" class="booking">12.00-16.00</div>
+                    }
+                    else
+                    {
+                        <div class="bookingTaken">12.00-16.00</div>
+                    }
+                    @if (BookingAvailable(timeThree, date))
+                    {
+                        <div data-bs-toggle="modal" data-bs-target="#bookingModal-@date-3" class="booking">16.00-20.00</div>
+                    }
+                    else
+                    {
+                        <div class="bookingTaken">16.00-20.00</div>
+                    }
+                    <div class="margin"></div>
+                </div>
+            }
+
+            <!-- Booking Modal 1 -->
+            <div class="modal fade" id="bookingModal-@date-1" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title blue-text">Boka tvättstuga</h5>
+                        </div>
+                        @if (date >= DateTime.Now.Day && monthCount >= 0 || monthCount > 0)
+                        {
+                            <div class="modal-body">
+                                <p>Vill du boka tvättstugan kl. @timeOne, @date/@month/@year?</p>
+                                @{ int day = date; }
+                            </div>
+                            <div class="modal-footer d-flex">
+                                <button type="button" class="primary-btn" data-bs-dismiss="modal" @onclick="async () => { SetBookingTime(timeOne, day); await SubmitBookingAsync(); }">Ja</button>
+                                <button type="button" class="primary-btn" data-bs-dismiss="modal">Nej</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="modal-body">
+                                <p>Datumet har redan passerat.</p>
+                            </div>
+                            <div class="modal-footer d-flex">
+                                <button type="button" class="primary-btn" data-bs-dismiss="modal">Stäng</button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Modal 2 -->
+            <div class="modal fade" id="bookingModal-@date-2" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title blue-text">Boka tvättstuga</h5>
+                        </div>
+                        @if (date >= DateTime.Now.Day && monthCount >= 0 || monthCount > 0)
+                        {
+                            <div class="modal-body">
+                                <p>Vill du boka tvättstugan kl. @timeTwo, @date/@month/@year?</p>
+                                @{ int day = date; }
+                            </div>
+                            <div class="modal-footer d-flex">
+                                <button type="button" class="primary-btn" data-bs-dismiss="modal" @onclick="async () => { SetBookingTime(timeTwo, day); await SubmitBookingAsync(); }">Ja</button>
+                                <button type="button" class="primary-btn" data-bs-dismiss="modal">Nej</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="modal-body">
+                                <p>Datumet har redan passerat.</p>
+                            </div>
+                            <div class="modal-footer d-flex">
+                                <button type="button" class="primary-btn" data-bs-dismiss="modal">Stäng</button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Modal 3 -->
+            <div class="modal fade" id="bookingModal-@date-3" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title blue-text">Boka tvättstuga</h5>
+                        </div>
+                        @if (date >= DateTime.Now.Day && monthCount >= 0 || monthCount > 0)
+                        {
+                            <div class="modal-body">
+                                <p>Vill du boka tvättstugan kl. @timeThree, @date/@month/@year?</p>
+                                @{ int day = date; }
+                            </div>
+                            <div class="modal-footer d-flex">
+                                <button type="button" class="primary-btn" data-bs-dismiss="modal" @onclick="async () => { SetBookingTime(timeThree, day); await SubmitBookingAsync(); }">Ja</button>
+                                <button type="button" class="primary-btn" data-bs-dismiss="modal">Nej</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="modal-body">
+                                <p>Datumet har redan passerat.</p>
+                            </div>
+                            <div class="modal-footer d-flex">
+                                <button type="button" class="primary-btn" data-bs-dismiss="modal">Stäng</button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+        @for (int column = 0; column < emptyColumnsEnd; column++)
+        {
+            <div class="day gray-text text-center">
+                <div class="margin">@(column + 1)</div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@code {
+    string timeOne = "08.00-12.00";
+    string timeTwo = "12.00-16.00";
+    string timeThree = "16.00-20.00";
+    string monthName = "";
+    DateTime monthStart;
+    DateTime monthEnd;
+    int emptyColumns = 0;
+    int emptyColumnsEnd = 0;
+    int monthCount = 0;
+    int month = DateTime.Now.Month;
+    int year = DateTime.Now.Year;
+    int lastMonthDate;
+
+    private LaundryBookingModel laundryBooking;
+    private List<LaundryBookingModel> laundryBookings = new List<LaundryBookingModel>();
+    private List<LaundryBookingModel> userLaundryBookings = new List<LaundryBookingModel>();
+    private List<LaundryBookingModel> filteredBookings = new List<LaundryBookingModel>();
+
+    protected override void OnInitialized()
+    {
+        laundryBooking = new LaundryBookingModel();
+        CreateMonth();
+        lastMonthDate = lastMonthDate - 6;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetBookingsAsync();
+        await GetUserBookingsAsync();
+    }
+
+    private void CreateMonth()
+    {
+        var tempDate = DateTime.Now.AddMonths(monthCount);
+        month = tempDate.Month;
+        year = tempDate.Year;
+
+        monthStart = new DateTime(year, month, 1);
+        monthEnd = monthStart.AddMonths(1).AddDays(-1);
+        monthName = monthStart.Month switch
+        {
+            1 => "Januari",
+            2 => "Februari",
+            3 => "Mars",
+            4 => "April",
+            5 => "Maj",
+            6 => "Juni",
+            7 => "Juli",
+            8 => "Augusti",
+            9 => "September",
+            10 => "Oktober",
+            11 => "November",
+            12 => "December",
+            _ => ""
+        };
+
+        emptyColumns = (int)monthStart.DayOfWeek;
+        if (emptyColumns == 0)
+        {
+            emptyColumns = 6;
+        }
+        else
+        {
+            emptyColumns--;
+        }
+
+        var lastMonthDays = monthStart.AddDays(-1);
+        var lastMonthEnd = lastMonthDays.Day;
+
+        emptyColumnsEnd = 42 - monthEnd.Day - emptyColumns;
+        lastMonthDate = lastMonthEnd - emptyColumns + 1;
+    }
+
+    private void SetBookingTime(string time, int day)
+    {
+        if (time == "08.00-12.00")
+        {
+            laundryBooking.Date = new DateTime(year, month, day, 8, 0, 0);
+        }
+        if (time == "12.00-16.00")
+        {
+            laundryBooking.Date = new DateTime(year, month, day, 12, 0, 0);
+        }
+        if (time == "16.00-20.00")
+        {
+            laundryBooking.Date = new DateTime(year, month, day, 16, 0, 0);
+        }
+    }
+
+    private bool BookingAvailable(string time, int day)
+    {
+        DateTime bookingDate1 = new DateTime(year, month, day, 8, 0, 0);
+        DateTime bookingDate2 = new DateTime(year, month, day, 12, 0, 0);
+        DateTime bookingDate3 = new DateTime(year, month, day, 16, 0, 0);
+
+        if (time == "08.00-12.00")
+        {
+            foreach (var booking in laundryBookings)
+            {
+                if (booking.Date == bookingDate1)
+                {
+                    return false;
+                }
+            }
+        }
+        if (time == "12.00-16.00")
+        {
+            foreach (var booking in laundryBookings)
+            {
+                if (booking.Date == bookingDate2)
+                {
+                    return false;
+                }
+            }
+        }
+        if (time == "16.00-20.00")
+        {
+            foreach (var booking in laundryBookings)
+            {
+                if (booking.Date == bookingDate3)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private async Task SubmitBookingAsync()
+    {
+        laundryBooking.IsBooked = true;
+        laundryBooking.UserId = await GetUserIdAsync();
+        await http.PostAsJsonAsync<LaundryBookingModel>("https://localhost:44363/api/LaundryBookings", laundryBooking);
+        await GetBookingsAsync();
+        await GetUserBookingsAsync();
+        laundryBooking = new LaundryBookingModel();
+        CreateMonth();
+    }
+
+    private async Task CancelBookingAsync(int id)
+    {
+        await http.DeleteAsync($"https://localhost:44363/api/LaundryBookings/{id}");
+        await GetBookingsAsync();
+        await GetUserBookingsAsync();
+        CreateMonth();
+    }
+
+    private async Task GetBookingsAsync()
+    {
+        laundryBookings = await http.GetFromJsonAsync<List<LaundryBookingModel>>("https://localhost:44363/api/LaundryBookings");
+    }
+
+    private async Task GetUserBookingsAsync()
+    {
+        var userId = await sessionStorage.GetItemAsync<string>("UserId");
+        userLaundryBookings = await http.GetFromJsonAsync<List<LaundryBookingModel>>($"https://localhost:44363/api/LaundryBookings/User/{userId}");
+        userLaundryBookings = userLaundryBookings.OrderByDescending(booking => booking.Date).ToList();
+        userLaundryBookings.Reverse();
+    }
+
+    private async Task<int> GetUserIdAsync()
+    {
+        var userId = await sessionStorage.GetItemAsync<string>("UserId");
+        var _userId = Int32.Parse(userId);
+        return _userId;
+    }
+}
